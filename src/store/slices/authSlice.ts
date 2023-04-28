@@ -3,6 +3,8 @@ import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as serverService from '@/services/serverService'
 import httpClient from "@/utils/httpClient";
 import { RootState, store } from "../store";
+import { setWithExpiry } from "@/utils/localHandler";
+import { constant } from "@/utils/constant";
 
 const initialState : UserState = {
     user:undefined,
@@ -19,6 +21,8 @@ interface SignInAction{
     password : string
 }
 
+
+//TOKEN
 export const signIn = createAsyncThunk('user/signin',async (credential:SignInAction) => {
     const response = await serverService.singIn(credential)
 
@@ -45,6 +49,10 @@ const authSlice = createSlice ({
         state.user=action.payload.user
         state.isAuthenticated= true
         state.isAuthenticating=false
+        
+        const {accessToken,user,isAuthenticated,isAuthenticating} = state
+
+        setWithExpiry(constant.STORAGE_TOKEN,{accessToken,user,isAuthenticated,isAuthenticating})
     })
   }
 })

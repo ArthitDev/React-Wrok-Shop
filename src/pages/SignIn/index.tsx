@@ -6,19 +6,22 @@ import {
   Typography,
   Grid,
   Link,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import { object, string } from "yup";
+import { boolean, object, string } from "yup";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/store/store";
 import { signIn } from "@/store/slices/authSlice";
 import { useState } from "react";
 import CustomModal from "@/components/CustomeModal";
+import { ViewSidebarOutlined, Visibility, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 
 
 const SignIn = () => {
-
+  const [showPassword,setShowPassword] = useState<boolean>(false);
   const [openModal,setOpenModal] = useState<boolean>(false)
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
@@ -100,11 +103,27 @@ const SignIn = () => {
                 as={TextField}
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : "password"}
                 id="password"
                 autoComplete="current-password"
                 error={Boolean(errors.password) && Boolean(touched.password)}
                 helperText={Boolean(touched.password) && errors.password}
+                InputProps={{
+                  endAdornment:(
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)}
+                      edge='end'
+                      >
+                        {showPassword ? (
+                          <VisibilityOutlined/>
+                        ):(
+                          <VisibilityOffOutlined />
+                        )}
+                        
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
 
               <Button
