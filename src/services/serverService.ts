@@ -1,4 +1,4 @@
-import { Product, ProductData } from "@/models/product.model"
+import { Product} from "@/models/product.model"
 import { Signin } from "@/models/signin.model"
 import  httpClient from "@/utils/httpClient"
 
