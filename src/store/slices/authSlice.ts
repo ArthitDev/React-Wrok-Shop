@@ -2,8 +2,8 @@ import { UserData, UserState } from "@/models/user.model";
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as serverService from '@/services/serverService'
 import httpClient from "@/utils/httpClient";
-import { RootState, store } from "../store";
-import { setWithExpiry } from "@/utils/localHandler";
+import { RootState,} from "../store";
+import { removeLocal, setWithExpiry } from "@/utils/localHandler";
 import { constant } from "@/utils/constant";
 
 const initialState : UserState = {
@@ -34,6 +34,15 @@ export const signIn = createAsyncThunk('user/signin',async (credential:SignInAct
     return response
 })
 
+export const signOut = createAsyncThunk('user/signout', async () => {
+    await serverService.singOut
+  
+    // CLEAR HEADER TOKEN
+    httpClient.interceptors.request.use((config) => {
+      config.headers['Authorization'] = ''
+      return config
+    })
+  })
 
 const authSlice = createSlice ({
     name: 'auth',
@@ -42,7 +51,19 @@ const authSlice = createSlice ({
         setUser: (state, action: PayloadAction<SetUser>) => {
           state.user = action.payload.user;
         },
-    },
+        restoreState: (state, action: PayloadAction<UserState>) => {
+            state.accessToken = action.payload.accessToken
+            state.user = action.payload.user
+            state.isAuthenticated = true
+            state.isAuthenticating = false
+      
+            // SET HEADER TOKEN
+          httpClient.interceptors.request.use((config) => {
+            config.headers['Authorization'] = `Bearer ${action.payload.accessToken}`
+            return config
+          })
+          }
+        },
    extraReducers:(builder)=>{
     builder.addCase(signIn.fulfilled,(state,action) =>{
         state.accessToken=action.payload.accessToken
@@ -54,11 +75,21 @@ const authSlice = createSlice ({
 
         setWithExpiry(constant.STORAGE_TOKEN,{accessToken,user,isAuthenticated,isAuthenticating})
     })
-  }
+    builder.addCase(signOut.fulfilled,(state) =>{
+        state.accessToken = ''
+        state.user = undefined
+        state.isAuthenticated = false
+        state.isAuthenticating = false
+
+        //Clear the storage token
+        removeLocal(constant.STORAGE_TOKEN)
+    })
+  },
 })
 
-export const {setUser} = authSlice.actions
+export const {setUser,restoreState} = authSlice.actions
 
 export default authSlice.reducer
 
 export const userSelector = (store:RootState): UserData | undefined => store.user.user
+

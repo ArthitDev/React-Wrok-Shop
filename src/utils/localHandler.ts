@@ -25,6 +25,7 @@ export const setLocal = (key: string, value: any) => {
   export const setWithExpiry = (key: string, value: any) => {
     const now = new Date()
     const expireDate = 1000 * 60 * 60 * 24 // 1 day
+    //const expireDate = 5000
   
     const item = {
       ...value,

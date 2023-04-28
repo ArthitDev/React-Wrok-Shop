@@ -1,5 +1,7 @@
+import { Product, ProductData } from "@/models/product.model"
 import { Signin } from "@/models/signin.model"
 import  httpClient from "@/utils/httpClient"
+
 
 
 type SignInProps = {
@@ -11,10 +13,15 @@ type SignInProps = {
 
 
 export const singIn = async (credential : SignInProps):Promise<Signin> => {
-    const {data:respone} = await httpClient.post<Signin>('/auth',credential)
-    return respone
+    const {data:response} = await httpClient.post<Signin>('/auth',credential)
+    return response
 }
 
-export const singout = async ():Promise<void> =>{
+export const singOut = async ():Promise<void> =>{
     await httpClient.post('auth/logout',null)
+}
+
+export const fecthProducts = async ():Promise<Product> =>{
+    const {data:response} = await httpClient.get<Product>('/products')
+    return response
 }
