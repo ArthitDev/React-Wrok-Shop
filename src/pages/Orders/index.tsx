@@ -6,18 +6,21 @@ import {
   Typography,
   Container,
 } from '@mui/material'
-import { formatCurrency } from '@/utils/formatCurrency'
-import { useEffect, useState } from 'react'
-import { ProductData } from '@/models/product.model'
+import { useEffect} from 'react'
 import { fecthProducts } from '@/services/serverService'
 import { imageUrl } from '@/utils/common'
+import { useAppDispatch } from '@/store/store'
+import { productSelector, setProducts } from '@/store/slices/productSlice'
+import { useSelector } from 'react-redux'
 
 const Orders = () => {
-  const [products, setProducts] = useState<ProductData[]>([])
+  const dispatch = useAppDispatch()
+  // const [products, setProducts] = useState<ProductData[]>([])
+  const products = useSelector(productSelector)
 
   useEffect(() => {
     fecthProducts()
-      .then((response) => setProducts(response.data))
+      .then((response) => dispatch(setProducts(response.data)))
       .catch((err) => console.log(err))
   }, [])
 
@@ -39,9 +42,11 @@ const Orders = () => {
                 sx={{ flexGrow: 1 }}
               >
                 <Typography className='!text-md truncate'>
-                  Heading Heading Heading Heading Heading Heading
+                  {
+                    product.name
+                  }
                 </Typography>
-                <Typography>{formatCurrency(100)}</Typography>
+                <Typography>{product.price} บาท </Typography>
               </CardContent>
             </Card>
           </Grid>
