@@ -10,12 +10,19 @@ import {
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import { object, string } from "yup";
-import { singIn } from "@/services/serverService";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store/store";
+import { signIn } from "@/store/slices/authSlice";
+import { useState } from "react";
+import CustomModal from "@/components/CustomeModal";
+
 
 const SignIn = () => {
 
+  const [openModal,setOpenModal] = useState<boolean>(false)
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  
   interface loginFrom {
     username: string;
     password: string;
@@ -40,12 +47,22 @@ const SignIn = () => {
   ) => {
     console.log(values)
     formikHelper.resetForm()
-    singIn(values)
-    .then((respone) => {
-      const {success} = respone
-      if(success) navigate('/dashboard',{replace:true})
+    dispatch(signIn(values)).then((data)=>{
+      console.log(data);
+      if(data.meta.requestStatus === "rejected"){
+        setOpenModal(true)
+      }
+      else{
+        navigate('/dashboard',{replace:true})
+      }
     })
-    .catch((err) => console.log(err))
+    //ยิง API 
+    // singIn(values)
+    // .then((respone) => {
+    //   const {success} = respone
+    //   if(success) navigate('/dashboard',{replace:true})
+    // })
+    // .catch((err) => console.log(err))
   };
   return (
     <Box className="mt-8 mx-8 flex flex-col items-center">
@@ -107,6 +124,7 @@ const SignIn = () => {
                 </Grid>
               </Grid>
             </Box>
+            <CustomModal title="Sign in feature" description="Email and password invalid" openModal={openModal} setOpenModal={setOpenModal}/>
           </Form>
         )}
       </Formik>
